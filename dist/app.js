@@ -1,4 +1,6 @@
 const icons = {
+ home:'<path d="m3 10 9-7 9 7v11h-6v-7H9v7H3V10Z"/>',
+ grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
  store:'<path d="m3 9 3-6h12l3 6c0 4-6 4-6 0 0 4-6 4-6 0 0 4-6 4-6 0Z"/><path d="M5 13v8h14v-8M10 21v-7h4v7"/>',
  search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',user:'<circle cx="12" cy="7" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',bag:'<path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/>',chevron:'<path d="m8 10 4 4 4-4"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',check:'<path d="m5 12 4 4L19 6"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',leaf:'<path d="M20 3C8 2 1 8 5 17c9 4 15-3 15-14Z"/><path d="M3 21 15 9"/>',tag:'<path d="m3 3 8 1 10 10-7 7L4 11 3 3Z"/><circle cx="7.5" cy="7.5" r="1"/>',repeat:'<path d="m17 2 4 4-4 4M3 10V8a2 2 0 0 1 2-2h16M7 22l-4-4 4-4m14 0v2a2 2 0 0 1-2 2H3"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M3 6h.1M3 12h.1M3 18h.1"/>'
 };
@@ -62,7 +64,7 @@ function renderProducts(){
  $('#load-more').hidden=!limited;$('#filter-bar').hidden=category==='all'&&!query;$('#filter-text').textContent=query?`Searching for “${query}”`:categories.find(c=>c[0]===category)?.[1];
 }
 function totals(){const count=Object.values(cart).reduce((a,b)=>a+b,0);const subtotal=products.reduce((a,p)=>a+(cart[p.id]||0)*p.price,0);const savings=products.reduce((a,p)=>a+(cart[p.id]||0)*(p.mrp-p.price),0);const delivery=subtotal>=299||!count?0:20;return{count,subtotal,savings,delivery,total:subtotal+delivery}}
-function updateCart(){save('cart',cart);const t=totals();$('#cart-count').hidden=!t.count;$('#cart-count').textContent=t.count;$('#cart-label').textContent=t.count?money(t.subtotal):'My cart';if(!$('#cart-drawer').hidden)renderCart();}
+function updateCart(){save('cart',cart);const t=totals();$('#cart-count').hidden=!t.count;$('#cart-count').textContent=t.count;$('#cart-label').textContent=t.count?money(t.subtotal):'My cart';if(!$('#cart-drawer').hidden)renderCart();document.dispatchEvent(new CustomEvent('kiranakottu:cart-change',{detail:t}));}
 function change(id,delta){const q=(cart[id]||0)+delta;if(q>20){toast('You can add up to 20 of each item.');return}if(q<=0)delete cart[id];else cart[id]=q;const focusSelector=`[data-change="${id}"][data-delta="${delta}"]`;const wasCart=!$('#cart-drawer').hidden;updateCart();renderProducts();(wasCart?$('#cart-body'):$('#product-grid')).querySelector(focusSelector)?.focus({preventScroll:true});}
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),3200)}
 function close(){if($('#modal').open)$('#modal').close();$('#cart-drawer').hidden=true;$('#scrim').hidden=true;document.body.classList.remove('locked');returnFocus?.focus({preventScroll:true});}
